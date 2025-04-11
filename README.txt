@@ -13,7 +13,7 @@ o generando el jar mediante mvn clean package.
 
 Adicionalmente adjunto un video de lo que se esperaba lograr.
 
-## funcionalidades del projecto
+## funcionalidades del proyecto
 
 - Login
 - Register
