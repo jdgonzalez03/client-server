@@ -78,7 +78,6 @@ public class UserController {
 
     public JSONObject getAllUsersExcept(String email) {
         JSONObject response = new JSONObject();
-        logger.log("Obteniendo todas los usuarios");
 
         try {
             List<UserDTO> users = userService.getAllUsersExcept(email);

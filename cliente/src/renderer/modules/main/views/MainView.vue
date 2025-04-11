@@ -19,10 +19,12 @@ import SideBar from '../components/SideBar.vue';
 import Toast from '../components/Toast.vue';
 import { provideToast } from '../composables/useToast';
 import { useAuthUser } from '../../auth/composables/useAuth';
+import { useContacts } from '../../chat/composables/useContacts';
 
 const toastRef = ref(null);
 const toast = provideToast();
 const { user } = useAuthUser();
+const {contacts} = useContacts();
 
 onMounted(() => {
   // Set the toast ref for the service to use
@@ -34,8 +36,8 @@ onMounted(() => {
     if (message.senderId !== user.value.id) {
       // Find sender name or use default
       let senderName = "Nuevo mensaje";
-      if (message.senderName) {
-        senderName = message.senderName;
+      if (message.senderId) {
+        senderName = contacts.value.find(contact => contact.id === message.senderId)?.name || "Desconocido";
       }
       
       toast.showMessage(
