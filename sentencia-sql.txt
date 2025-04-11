@@ -1,0 +1,82 @@
+-- Crear la base de datos
+CREATE DATABASE IF NOT EXISTS chat_db;
+USE chat_db;
+
+-- Tabla de usuarios
+CREATE TABLE IF NOT EXISTS User (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    passwordHashed VARCHAR(255) NOT NULL,
+    photo LONGBLOB,
+    ip VARCHAR(45),
+    createAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updateAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Tabla de logs de eventos
+CREATE TABLE IF NOT EXISTS EventLogs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    eventType ENUM('LOGIN', 'LOGOUT', 'MESSAGE_SENT', 'MESSAGE_RECEIVED', 'CHANNEL_CREATED') NOT NULL,
+    userId INT NOT NULL,
+    timeStamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (userId) REFERENCES User(id)
+);
+
+-- Tabla de canales
+CREATE TABLE IF NOT EXISTS Channel (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    isPublic BOOLEAN DEFAULT TRUE,
+    createAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabla de mensajes
+CREATE TABLE IF NOT EXISTS Message (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    content TEXT NOT NULL,
+    status ENUM('SENT', 'DELIVERED', 'READ') DEFAULT 'SENT',
+    timeStamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    senderId INT NOT NULL,
+    receiverId INT,
+    channelId INT,
+    FOREIGN KEY (senderId) REFERENCES User(id),
+    FOREIGN KEY (receiverId) REFERENCES User(id),
+    FOREIGN KEY (channelId) REFERENCES Channel(id)
+);
+
+-- Tabla de archivos adjuntos
+CREATE TABLE IF NOT EXISTS Attachment (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    fileData LONGBLOB NOT NULL,
+    fileName VARCHAR(255) NOT NULL,
+    fileSize INT NOT NULL,
+    type ENUM('IMAGE', 'VIDEO', 'DOCUMENT') NOT NULL,
+    messageId INT NOT NULL,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (messageId) REFERENCES Message(id)
+);
+
+-- Tabla de solicitudes de canal
+CREATE TABLE IF NOT EXISTS Request (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    senderId INT NOT NULL,
+    receiverId INT NOT NULL,
+    channelId INT,
+    status ENUM('PENDING', 'ACCEPTED', 'REJECTED') DEFAULT 'PENDING',
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (senderId) REFERENCES User(id),
+    FOREIGN KEY (receiverId) REFERENCES User(id),
+    FOREIGN KEY (channelId) REFERENCES Channel(id)
+);
+
+-- Tabla intermedia para usuarios y canales
+CREATE TABLE IF NOT EXISTS ChannelUser (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    userId INT NOT NULL,
+    channelId INT NOT NULL,
+    role ENUM('MEMBER', 'ADMIN') DEFAULT 'MEMBER',
+    joinedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (userId) REFERENCES User(id),
+    FOREIGN KEY (channelId) REFERENCES Channel(id)
+);
